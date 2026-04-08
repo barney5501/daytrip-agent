@@ -6,7 +6,6 @@ GEOCODING_REQUEST_URL = "https://geocoding-api.open-meteo.com/v1/search?name={ci
 AIRQUALITY_REQUEST_URL = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&current=european_aqi&hourly=european_aqi&forecast_days=2"
 
 GEO_FIELDS = ["latitude", "longitude"]
-AIRQ_FIELDS = ["tempC", "chanceofrain", "humidity", "weatherDesc", "uvIndex"]
 
 
 def get_city_coordinates(city: str) -> dict:
@@ -34,7 +33,9 @@ def get_air_quality(
         city: name of the city (in hebrew) ("תל אביב", "מודיעין", "פריז", etc).
         day: "today" or "tomorrow", optional. no mention will return both - good for comparison.
     Returns:
-        A list of dicts representing temperature and humidity levels in the specified city at the specified times.
+        a dictionary with the current air quality (under "current") and the air quality for every hour in the next 2 days (under "forecast").
+        notes:  - the air quality is represented in EAQI (european aqi).
+                - the timestamps are in the GMT timezone and you may have to convert them for accuracy.
     """
     try:
         city_coordinates = get_city_coordinates(city=city)
@@ -51,10 +52,16 @@ def get_air_quality(
     airq_data = response.json()
     current_airq = airq_data["current"]["european_aqi"]
     forecast_airq = airq_data["hourly"]
-    forecast_airq = {
-        k: v for k, v in zip(forecast_airq["time"], forecast_airq["european_aqi"])
-    }
-
+    forecast_airq_times = forecast_airq["time"]
+    forecast_airq_values = forecast_airq["european_aqi"]
+    if day:
+        forecast_airq_times = (
+            forecast_airq_times[:24] if day == "today" else forecast_airq_times[24:]
+        )
+        forecast_airq_values = (
+            forecast_airq_values[:24] if day == "today" else forecast_airq_values[24:]
+        )
+    forecast_airq = {k: v for k, v in zip(forecast_airq_times, forecast_airq_values)}
     airq_result = {"current": current_airq, "forecast": forecast_airq}
 
     return airq_result
