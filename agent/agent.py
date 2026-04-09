@@ -47,7 +47,17 @@ async def call_agent_async(query):
         user_id=USER_ID, session_id=SESSION_ID, new_message=content
     )
 
+    logs = ""
     async for event in events:
-        if event.is_final_response():
+        if not event.is_final_response():
+            calls = []
+            for part in event.content.parts:
+                if hasattr(part, "function_call") and part.function_call is not None:
+                    part_call = f"function called: {part.function_call.name}.\npassed arguments: {part.function_call.args}\n"
+                    calls.append(part_call)
+            logs += "\n".join(calls)
+            yield ("בוחן...", logs)
+        else:
             final_response = event.content.parts[0].text
-            return {"AgentResponse": final_response}
+            logs += "\n\n\nתשובה סופית"
+            yield (final_response, logs)

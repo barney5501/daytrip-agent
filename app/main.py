@@ -3,24 +3,23 @@ import asyncio
 from agent.agent import call_agent_async
 
 
-def agent_response_handler():
-    pass
-
-
-def prompt_agent(message, history):
+async def prompt_agent(message, history):
     try:
-        response = asyncio.run(call_agent_async(message))
-        return response["AgentResponse"]
+        async for response, log in call_agent_async(message):
+            yield response, log
     except Exception as e:
-        print("Exception", e)
-        return (
-            "סליחה, אני עמוס בפניות קודמות ולא יכול לענות כרגע. ניתן לנסות שוב בקרוב!"
+        yield (
+            "סליחה, אני עמוס בפניות קודמות ולא יכול לענות כרגע. ניתן לנסות שוב בקרוב!",
+            f"Error: {e}",
         )
 
 
-with gr.Blocks(title="Travel Agent 📍") as demo:
+with gr.Blocks(title="Travel Agent 📍",css="") as demo:
     gr.Markdown("# Plan your day or activity and get tips and relevant information!")
     with gr.Row():
+        with gr.Column(scale=1):
+            gr.Markdown("מאחורי הקלעים")
+            logs = gr.Code(label="שימוש בכלים", language="json")
         with gr.Column(scale=3):
             chat = gr.ChatInterface(
                 fn=prompt_agent,
@@ -29,11 +28,8 @@ with gr.Blocks(title="Travel Agent 📍") as demo:
                     "כדאי לי לצאת לריצה מחר בבוקר במודיעין?",
                 ],
                 title="Chat",
+                additional_outputs=[logs],
             )
-        with gr.Column(scale=1):
-            gr.Markdown("מאחורי הקלעים")
-            logs = gr.Code(label="שימוש בכלים", language="json")
-
 
 if __name__ == "__main__":
     demo.launch()
