@@ -14,7 +14,7 @@ async def prompt_agent(message, history):
         )
 
 
-with gr.Blocks(title="Travel Agent 📍",css="") as demo:
+with gr.Blocks(title="Travel Agent 📍") as demo:
     gr.Markdown("# Plan your day or activity and get tips and relevant information!")
     with gr.Row():
         with gr.Column(scale=1):
@@ -29,6 +29,7 @@ with gr.Blocks(title="Travel Agent 📍",css="") as demo:
                 ],
                 title="Chat",
                 additional_outputs=[logs],
+                cache_examples=False,
             )
 
 if __name__ == "__main__":
