@@ -1,5 +1,13 @@
 from google.adk.agents.llm_agent import Agent
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
 from tools import available_tools
+
+APP_NAME = "Travel Agent"
+USER_ID = "user_default"
+SESSION_ID = "session_01"
+
 
 root_agent = Agent(
     model="gemini-3.1-flash-lite-preview",
@@ -17,3 +25,29 @@ root_agent = Agent(
     """,
     tools=available_tools,
 )
+
+
+# Session and Runner
+async def setup_session_and_runner():
+    session_service = InMemorySessionService()
+    session = await session_service.create_session(
+        app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
+    )
+    runner = Runner(
+        agent=root_agent, app_name=APP_NAME, session_service=session_service
+    )
+    return session, runner
+
+
+# Agent Interaction
+async def call_agent_async(query):
+    content = types.Content(role="user", parts=[types.Part(text=query)])
+    session, runner = await setup_session_and_runner()
+    events = runner.run_async(
+        user_id=USER_ID, session_id=SESSION_ID, new_message=content
+    )
+
+    async for event in events:
+        if event.is_final_response():
+            final_response = event.content.parts[0].text
+            return {"AgentResponse": final_response}
