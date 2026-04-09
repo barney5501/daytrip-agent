@@ -15,7 +15,6 @@ def get_city_coordinates(city: str) -> dict:
         raise ValueError("City name not found!")
     geo_data = response.json()["results"][0]
     geo_data = {k: v for k, v in geo_data.items() if k in GEO_FIELDS}
-    print("GEODATA", geo_data)
     return geo_data
 
 

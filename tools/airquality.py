@@ -1,6 +1,6 @@
 import requests
 from typing import Optional, Literal
-from utils import get_city_coordinates, filter_dict
+from .utils import get_city_coordinates, filter_dict
 
 AIRQUALITY_REQUEST_URL = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&current=european_aqi&hourly=european_aqi&forecast_days=2"
 

@@ -1,6 +1,6 @@
 import requests
 from typing import Optional, Literal, List
-from utils import filter_dict
+from .utils import filter_dict
 
 WEATHER_REQUEST_URL = "https://wttr.in/{city}?format=j1"
 DAY_LITERAL_MAP = {"today": 0, "tomorrow": 1, "day_after_tomorrow": 2}
