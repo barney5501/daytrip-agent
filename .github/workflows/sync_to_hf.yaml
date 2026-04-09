@@ -1,6 +1,15 @@
-- name: Sync GitHub to Hugging Face Hub
-  uses: huggingface/hub-sync@v0.1.0
-  with:
-    factory_address: "huggingface.co"
-    space_id: "Barney5501/daytrip-agent"
-    token: ${{ secrets.HF_WRITE_TOKEN }}
+name: Sync to Hugging Face Hub
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: huggingface/hub-sync@v0.1.0
+        with:
+          github_repo_id: barney5501/daytrip-agent
+          huggingface_repo_id: Barney5501/daytrip-agent
+          hf_token: ${{ secrets.HF_WRITE_TOKEN }}
